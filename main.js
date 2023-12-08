@@ -5,6 +5,7 @@ import { Realtime } from 'ably';
 import { nanoid } from 'nanoid';
 import { generate } from 'random-words';
 import uniqolor from 'uniqolor';
+import memoize from 'memoize';
 
 const client = new Realtime.Promise({ key: import.meta.env.VITE_ABLY_API_KEY, clientId: nanoid() });
 const spaces = new Spaces(client);
@@ -18,6 +19,10 @@ await space.enter({
 });
 
 const canvas = document.querySelector('.canvas');
+const getCanvasRect = memoize((width, height) => canvas.getBoundingClientRect(), {
+  cacheKey: args => args.join(',')
+});
+let canvasRect = getCanvasRect(window.innerWidth, window.innerHeight);
 
 const self = await space.members.getSelf();
 
@@ -33,15 +38,22 @@ space.cursors.subscribe('update', async (cursorUpdate) => {
     return;
   }
 
+  canvasRect = getCanvasRect(window.innerWidth, window.innerHeight);
+  const scaleX = canvasRect.width / cursorUpdate?.data?.canvas?.width;
+  const scaleY = canvasRect.height / cursorUpdate?.data?.canvas?.height;
+
+  const x = scaleX * cursorUpdate.position.x;
+  const y = scaleY * cursorUpdate.position.y;
+
   if (existingNode) {
-    existingNode.style.top = `${cursorUpdate.position.y}px`;
-    existingNode.style.left = `${cursorUpdate.position.x}px`;
+    existingNode.style.top = `${y}px`;
+    existingNode.style.left = `${x}px`;
   } else {
     const node = document.createElement('span');
     node.id = `connectionid-${cursorUpdate.connectionId}`;
     node.classList.add('cursor');
-    node.style.top = `${cursorUpdate.position.y}px`;
-    node.style.left = `${cursorUpdate.position.x}px`;
+    node.style.top = `${y}px`;
+    node.style.left = `${x}px`;
     const member = await space.members.getByConnectionId(cursorUpdate.connectionId);
     node.style.backgroundColor = member.profileData.color || 'black';
     canvas.appendChild(node)
@@ -50,7 +62,14 @@ space.cursors.subscribe('update', async (cursorUpdate) => {
 
 
 canvas.addEventListener('mousemove', ({ clientX, clientY }) => {
-  space.cursors.set({ position: { x: clientX, y: clientY } });
+  // Adjust for the position of the canvas
+  const x = clientX - canvasRect.left;
+  const y = clientY - canvasRect.top
+  canvasRect = getCanvasRect(window.innerWidth, window.innerHeight);
+  space.cursors.set({ 
+    position: { x: clientX - canvasRect.left, y: clientY - canvasRect.top }, 
+    data: { canvas: { width: canvasRect.width, height: canvasRect.height } } 
+  });
 });
 
 canvas.addEventListener('mouseleave', ({ clientX, clientY }) => {

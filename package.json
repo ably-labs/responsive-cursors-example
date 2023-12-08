@@ -14,6 +14,7 @@
   "dependencies": {
     "@ably/spaces": "^0.3.0",
     "ably": "^1.2.48",
+    "memoize": "^10.0.0",
     "nanoid": "^5.0.4",
     "random-words": "^2.0.0",
     "uniqolor": "^1.1.0"

@@ -16,4 +16,12 @@ body {
   height: 80%;
   width: 80%;
   border-radius: 5px;
+  position: relative;
+}
+
+.cursor {
+  position: absolute;
+  width: 5px;
+  height: 5px;
+  border-radius: 100%;
 }

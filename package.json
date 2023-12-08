@@ -10,5 +10,12 @@
   },
   "devDependencies": {
     "vite": "^5.0.0"
+  },
+  "dependencies": {
+    "@ably/spaces": "^0.3.0",
+    "ably": "^1.2.48",
+    "nanoid": "^5.0.4",
+    "random-words": "^2.0.0",
+    "uniqolor": "^1.1.0"
   }
 }

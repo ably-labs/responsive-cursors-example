@@ -25,3 +25,21 @@ body {
   height: 5px;
   border-radius: 100%;
 }
+
+.fixed-element {
+  position: absolute;
+  top: 25%;
+  left: 40%;
+  width: 200px;
+  height: 100px;
+  background-color: red;
+}
+
+.resizing-element {
+  position: absolute;
+  top: 75%;
+  right: 5%;
+  width: 20%;
+  height: 10%;
+  background-color: blue;
+}
